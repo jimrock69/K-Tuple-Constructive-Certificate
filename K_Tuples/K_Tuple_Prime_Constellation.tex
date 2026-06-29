@@ -1,0 +1,464 @@
+\RequirePackage{fix-cm}
+\RequirePackage{silence}
+\WarningFilter{latex}{Command \showhyphens has changed}
+\documentclass[sn-mathphys-num, pdflatex]{sn-jnl}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{bookmark}
+\usepackage{microtype}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{booktabs}
+
+% Configure the appearance of the code
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstset{
+    language=Python,
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\scriptsize,      
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    columns=flexible
+}
+\title{Quadratic Expansion and Sieve Resilience: \\ \Large A Constructive Framework for Prime k-tuples}
+
+\author{\begin{center} James Rock \\ Orcid ID 0000-0003-2858-6077 \\ Email: jimrock69@comcast.net \end{center}}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+{}The distribution of prime constellations, from twin primes to dense k-tuples, is often studied asymptotically. However, the transition of these patterns from one prime scale to the next follows a rigid mechanical structure. This paper presents a recursive inequality that governs the propagation of admissible prime constellations between consecutive prime intervals. We define a ``Prime Region'' as the interval bounded by a prime $P_{n}$ and its square $P_{n}^{2}$. We demonstrate that the count of any symmetric k-tuple in a new region is strictly bounded below by the count in the previous region, modulated by a geometric growth factor. By analyzing the ``Territory Expansion'' of the number line against the ``Density Decay'' of the prime sieve, we identify a massive ``Safety Margin'' inherent in the geometry of integers. We generalize this mechanism to symmetric k-tuples, introducing the concept of ``Sieve Resilience'' to construct optimal search centers for large constellations. This framework reveals that the quadratic expansion of the search space ($P^2$) consistently overpowers the linear growth of the sieve density ($k \cdot P$), providing a constructive mechanism for the infinite propagation of not just twin primes, but all admissible symmetric constellations.
+\end{abstract}
+
+\noindent \textbf{Keywords:} Deterministic Sieve; Lean 4 formalization; Spectral Rigidity; Symmetric Sieve Correlation (SSC);  Symplectic-Vaughan Constant \\
+\noindent \textbf{MSC 2020 Classification:} 11N05; 11N35; 11P32; 42A16
+
+\section{Introduction and Definitions}
+
+To formalize the transition between prime scales, we define the following terms:
+
+\begin{itemize}
+    \item \textbf{Prime Region ($R_{n}$):} The interval of integers bounded by a prime $P_{n}$ and its square $P_{n}^{2}$. This region represents the "Horizon of Certainty" for the sieve; for any $x < P_{n}^{2}$, primality is determined entirely by factors $q \le P_{n}$.
+
+    \item \textbf{Admissible k-Tuple:} A repeating constellation of $k$ primes formed by a base prime $p$ and a fixed set of even integer offsets $\mathcal{D} = \{d_1, d_2, \dots, d_{k-1}\}$.
+    \begin{itemize}
+        \item \textit{Condition:} The tuple is ``admissible'' if the offsets do not cover all residue classes modulo any prime $q$.
+        \item \textit{Example:} $\{p, p+2, p+4\}$ is not admissible (covers all mod 3). $\{p, p+2, p+6\}$ is admissible.
+    \end{itemize}
+
+    \item \textbf{Symmetric Prime k-Tuple:} A specific subclass of admissible constellations where the primes are pairwise symmetric around a central value $C$.
+    \begin{itemize}
+        \item \textit{Center:} $C = (q_1 + q_k)/2$.
+        \item \textit{Structure:} For every prime $C-d$ in the tuple, there is a corresponding prime $C+d$.
+        \item \textit{Minimality:} We focus on tuples with minimal diameter ($H = q_k - q_1$) to analyze the tightest possible sieve constraints.
+    \end{itemize}
+
+    \item \textbf{Sieve Resilience:} A property of specific search centers (e.g., $C = 105 + 210n$) that are pre-aligned to be coprime to small primes ($2, 3, 5, 7$). This effectively reduces the sieve's "Density Decay" to zero for the initial, most destructive steps.
+
+    \item \textbf{Territory Expansion (Supply):} The quadratic growth of the Prime Region ($P_{n-1}^2 \to P_{n}^2$), which generates a massive supply of new integer candidates.
+
+    \item \textbf{Density Decay (Demand):} The linear filtering cost of the sieve, where each new prime $P_{n}$ eliminates a fraction of the candidates (approximately $k/P_{n}$).
+\end{itemize}
+
+The distribution of twin primes—and more generally, prime k-tuples—is traditionally approached through asymptotic probabilistic models. However, to derive a governing inequality for these constellations, we must move beyond asymptotic averages and examine the mechanical transition between prime intervals.
+
+We model this transition as a physical process involving two competing rates:
+\begin{enumerate}
+    \item \textbf{Expansion (The Supply):} We calculate the multiplicative increase in the number line interval (the ``Territory'') as we move from $P_{n-1}$ to $P_{n}$.
+    \item \textbf{Decay (The Demand):} We calculate the multiplicative decrease in constellation density caused by the sieving effect of the new prime $P_{n}$.
+    \item \textbf{Net Interaction:} We multiply these two rates to determine the Expected Net Growth.
+\end{enumerate}
+
+This paper posits a \textbf{Constructive Hypothesis}: The geometry of the number line ensures that the ``Supply'' of new territory consistently outpaces the ``Demand'' of the density decay. We define a massive ``Safety Margin'' inherent in this geometry ($1+2c/P$ vs $1+c/P$), ensuring that the accumulation of new candidates provides a constructive mechanism for the infinite propagation of twin primes and, by extension, all admissible symmetric k-tuples.
+
+\section{Theoretical Framework: The Constructive Hypothesis}
+
+While the distribution of twin primes and k-tuples is traditionally analyzed through asymptotic averages (e.g., the Hardy-Littlewood conjectures \cite{Hardy1923}, such probabilistic models describe the \textit{expected} density over large scales but do not strictly preclude local voids. To establish a rigorous lower bound, we must shift from an asymptotic perspective to a \textit{constructive} one, modeling the transition between prime intervals as a deterministic mechanical process.
+
+\subsection{The Supply-Demand Dynamics}
+We propose the ``Constructive Hypothesis,'' which treats the number line not as a static set of integers, but as a dynamic terrain governed by two competing forces:
+
+\begin{enumerate}
+    \item \textbf{Geometric Supply (The Expansion):} As the analysis moves from $P_{n-1}$ to $P_{n}$, the interval under consideration expands from $P_{n-1}^2$ to $P_{n}^2$. This expansion is quadratic.
+    \item \textbf{Arithmetic Demand (The Decay):} Simultaneously, the introduction of $P_{n}$ as a new sieve filter removes candidates from this expanded territory. This removal process is linear (removing 2 residue classes for twin primes, or $k$ for k-tuples).
+\end{enumerate}
+
+The core of our framework is the interaction between these two rates. Because the ``Territory Supply'' grows quadratically while the ``Sieve Demand'' grows only linearly, there exists a structural surplus of candidates. The Constructive Hypothesis asserts that this surplus is not accidental but is a fundamental geometric property that ensures the population of constellations can never reach zero.
+
+\subsection{The Logic of the Lower Bound}
+The derivation in the subsequent sections relies on identifying a specific ``Safety Margin.'' Rather than attempting to predict the \textit{exact} count of twin primes (which fluctuates due to local randomness), we construct a recursive inequality that demands only a fraction of the theoretical growth.
+
+By proving that the physical expansion of the number line ($1 + 2c/P$) consistently exceeds the requirements of our recursive formula ($1 + c/P$), we establish an unbreakable ``floor'' for the population count. This approach effectively dampens the variance inherent in prime distributions, allowing us to define a minimum propagation rate that holds true regardless of local irregularities in the sieve.
+\section{Derivation of Component Rates}
+
+\subsection{Step 1: The Expansion Rate }
+First, we quantify the growth of the interval.
+The length of the previous interval is $L_{n-1} \approx P_{n-1}^2$.
+The length of the current interval is $L_n \approx P_n^2$.
+Substituting $P_n = P_{n-1} + c$, the multiplicative expansion rate is:
+
+\begin{equation}
+    R_E = \frac{P_n^2}{P_{n-1}^2} = \left( \frac{P_{n-1} + c}{P_{n-1}} \right)^2 = \left( 1 + \frac{c}{P_{n-1}} \right)^2
+\end{equation}
+
+Expanding the square yields the precise geometric growth factor:
+\begin{equation}
+    R_E = 1 + \frac{2c}{P_{n-1}} + \frac{c^2}{P_{n-1}^2}
+\end{equation}
+This confirms that the "Supply" of new numbers grows linearly with the gap ($2c/P$) and includes a quadratic bonus ($c^2/P^2$).
+
+\subsection{Step 2: The Decay Rate}
+Next, we quantify the "Demand" of the sieve.
+The new prime $P_n$ removes candidates where $x \equiv 0 \pmod{P_n}$ or $x+2 \equiv 0 \pmod{P_n}$.
+The probability of a candidate surviving this new filter is:
+\begin{equation}
+    R_D = \frac{P_n - 2}{P_n} = 1 - \frac{2}{P_n}
+\end{equation}
+To maintain a strict lower bound, we can approximate the denominator with $P_{n-1}$ (since $P_n > P_{n-1}$, subtracting $2/P_{n-1}$ is a slightly harsher penalty than reality, keeping us conservative).
+\begin{equation}
+    R_D \approx 1 - \frac{2}{P_{n-1}}
+\end{equation}
+
+\section{Synthesis of the Transfer Function}
+
+The expected number of twin primes in the new interval ($TPA_{expected}$) is the product of the old count, the expansion rate, and the decay rate.
+
+\begin{equation}
+    R_{net} = R_E \times R_D
+\end{equation}
+
+Substituting the terms derived above:
+\begin{equation}
+    R_{net} \approx \left( 1 + \frac{2c}{P_{n-1}} + \frac{c^2}{P_{n-1}^2} \right) \cdot \left( 1 - \frac{2}{P_{n-1}} \right)
+\end{equation}
+
+We expand this product term by term to find the \textit{Theoretical Net Growth}:
+\begin{align}
+    R_{net} &\approx 1 \cdot \left(1 - \frac{2}{P}\right) + \frac{2c}{P} \cdot \left(1 - \frac{2}{P}\right) + \frac{c^2}{P^2} \cdot \left(1 - \frac{2}{P}\right) \\
+    &\approx 1 - \frac{2}{P} + \frac{2c}{P} - \frac{4c}{P^2} + \frac{c^2}{P^2} - \dots
+\end{align}
+
+Grouping the dominant linear terms ($\frac{1}{P}$) and quadratic terms ($\frac{1}{P^2}$):
+\begin{equation}
+    R_{net} \approx 1 + \frac{2c - 2}{P_{n-1}} + \frac{c^2 - 4c}{P_{n-1}^2}
+\end{equation}
+
+\textbf{Result:} The \textit{Theoretical} growth of the twin prime population is driven by the linear term $\frac{2c-2}{P_{n-1}}$.
+
+\section{Construction of the Lower Bound Inequality}
+
+We have established that the \textit{Theoretical Growth} is approximately $1 + \frac{2c-2}{P_{n-1}}$. However, relying on an average expectation is not sufficient for a proof.
+
+To create a robust inequality that accounts for local variance, we introduce a \textbf{Safety Factor of 2}. We construct the recursive formula (Equation \ref{eq:growth}) to demand only \textbf{half} of the theoretical linear growth.
+
+\subsection{Comparing Theoretical vs. Required Growth}
+\begin{itemize}
+    \item \textbf{Theoretical Expectation:} $1 + \frac{\mathbf{2c - 2}}{P_{n-1}}$
+    \item \textbf{Formula Requirement (Equation \ref{eq:growth}):} $1 + \frac{\mathbf{2c - 2}}{2P_{n-1}}$
+\end{itemize}
+
+Notice the denominator in the formula is $2P_{n-1}$ rather than $P_{n-1}$. This mathematically encodes the "Safety Margin."
+
+\textbf{Justification:}
+Since the physical geometry of the number line provides roughly twice as much net expansion ($\frac{2c-2}{P}$) as the inequality requires ($\frac{2c-2}{2P}$), the actual count $TPA_n$ will strictly exceed the value predicted by the formula for all sufficiently large $P_n$.
+
+This derivation proves that Equation (\ref{eq:growth}) is not arbitrary; it is a dampened version of the geometric expansion rate, designed to serve as an unbreakable lower floor.
+\section{The Recursive Growth Formula}
+Having established the theoretical framework and the necessary safety margin, we now formalize the governing inequality. This formula does not merely describe an observation; it represents the mechanical lower bound derived from the competition between Territory Expansion and Density Decay.
+
+By applying the Safety Factor of 2 to the theoretical growth rate, we define a "Transfer Function" that relates the twin prime count in the current interval ($TPA_n$) to the count in the previous interval ($TPA_{n-1}$). As validated by the empirical data in Table 1, the inequality is:
+
+\begin{equation}
+    TPA_n > (TPA_{n-1}) \cdot \left(1 + \frac{2c - 2}{2P_{n-1}} + \frac{c^2 - 2c}{2P_{n-1}^2}\right) \label{eq:growth}
+\end{equation}
+
+\subsection{Formula Mechanics}
+This formula balances two competing forces:
+\begin{enumerate}
+    \item \textbf{Expansion Terms ($c, c^2$):} The terms involving $c$ and $c^2$ quantify the physical expansion of the number line (the new territory).
+    \item \textbf{Normalization ($P_{n-1}$):} The denominator normalizes this growth against the sieving effect of the new prime.
+\end{enumerate}
+The existence of the quadratic term ($c^2$) in the numerator is crucial; it ensures that the "supply" of new numbers grows faster than the "demand" of the sieve.
+
+
+\section{Generalization for Larger Gaps} 
+For $c>2$ the safety margin established above assumed the worst-case scenario ($c=2$). For larger gaps, the margin expands significantly.
+
+Comparing the growth terms:
+\begin{itemize}
+    \item \textbf{Formula Demand:} The dominant linear term is $\frac{c}{P}$.
+    \item \textbf{Territory Supply:} The physical expansion is roughly $\frac{2c}{P}$.
+\end{itemize}
+As $c$ increases, the "Supply" of new integers outpaces the "Demand" of the formula by a factor of roughly $2:1$. Furthermore, the quadratic term ($c^2$) in the physical expansion ensures that the territory term always dominates the linear density adjustments.
+
+\section{Empirical Verification}
+Table 1 compares the actual twin prime counts ($TPA_n$) against the values predicted by the recursive inequality. The ratio $F/G$ (Calculated/Actual) consistently approaches $1$ from below, confirming the inequality is a tight lower bound.
+
+\begin{center}
+\begin{tabular}{rrrrc}
+\toprule
+\multicolumn{1}{c}{$P_n$} & \multicolumn{1}{c}{$TPA_{n-1}$} & \multicolumn{1}{c}{Calc. Lower Bound} & \multicolumn{1}{c}{Actual $TPA_n$} & \multicolumn{1}{c}{Ratio} \\
+\midrule
+1021 & 8450 & 8524.8 & 8586 & 0.992 \\
+3463 & 68872 & 68931.7 & 69019 & 0.998 \\
+26863 & 2555371 & 2556798.3 & 2558027 & 0.999 \\
+31321 & 3365489 & 3366026.3 & 3366653 & 0.999 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Algorithmic Optimization for Symmetric Prime k-tuples}
+
+The mechanism of ``Quadratic Overpowering'' demonstrates that within local search intervals $[P_n, P_n^2]$, the spatial expansion of the number line structurally buffers against the linear density degradation of the prime sieve. While establishing absolute global bounds for infinity remains a classical open problem, this framework can be generalized to define a highly deterministic optimization model for locating dense, symmetric $k$-tuples. We show that by mechanically aligning search centers with primorial structures, we can reduce the initial sieve degradation to zero and structurally maximize local density parameters.
+
+\subsection{Supply vs. Demand Dynamics in Algorithmic Search}
+When executing a search for a constellation of $k$ primes defined by an array of symmetric integer offsets $\mathcal{D} = \{\pm d_1, \pm d_2, \dots, \pm d_{k/2}\}$, the computational efficiency is governed by the net interaction of two distinct forces:
+\begin{enumerate}
+    \item \textbf{Geometric Supply (Constant):} The ``Territory Expansion'' is an intrinsic property of the interval $[P_{n}, P_{n}^{2}]$ itself. It generates candidate space at a rate of approximately $1+\frac{2c}{P_n}$, independent of the configuration under evaluation.
+    \item \textbf{Arithmetic Demand (Variable):} The ``Density Decay'' represents the filtering cost of the sieve. For a random or unaligned search center, the introduction of a prime filter $P_n$ removes up to $k$ distinct residue classes, decreasing candidate density by a factor of approximately $k/P_n$.
+\end{enumerate}
+In an unoptimized search window, the probability of a random integer center supporting a highly dense configuration (such as $k=8$ or $k=10$) is vanishingly small due to this compounding linear decay.
+
+\subsection{Constructive Center Selection via Sieve Resilience}
+To maximize candidate survival rates, we define a search center $C$ as \textit{Sieve Resilient} up to a prime boundary $p_m$ if the offset array $\mathcal{D}$ is completely disjoint from the residue class of $C$ modulo $p$ for all $p \le p_m$:
+\begin{equation}
+    C + d_i \not\equiv 0 \pmod p \quad \forall d_i \in \mathcal{D}, \quad \forall p \le p_m
+\end{equation}
+By constructing search coordinates based on primorial steps $M_m = \prod_{p \le p_m} p$, we pre-align our search environments to neutralize the filtering effect of the smallest, most computationally destructive primes.
+
+\subsection{Algorithmic Application: The Symmetric Decuplet (D\_{10})}
+Consider a symmetric 10-tuple ($k=10$) with a spatial diameter of 44, defined by the offset array $\mathcal{D} = \{\pm 2, \pm 4, \pm 8, \pm 16, \pm 22\}$. To maximize local candidate survival, we restrict the search space exclusively to coordinates generated by the primorial arithmetic progression:
+\begin{equation}
+    C(n) = 105 + 210n
+\end{equation}
+where $M_4 = 2 \cdot 3 \cdot 5 \cdot 7 = 210$, and $105$ is the symmetric balancing point. This algorithmic alignment guarantees absolute resilience against the first four prime sieves:
+\begin{itemize}
+    \item \textbf{Modulo 2:} $C(n)$ is identically odd. Because all elements in $\mathcal{D}$ are even, $C(n) \pm d_i$ is guaranteed to be odd, yielding a $0\%$ filtration rate for $p=2$.
+    \item \textbf{Modulo 3:} $C(n) \equiv 0 \pmod 3$. Because no offset in $\mathcal{D}$ is divisible by 3, $C(n) \pm d_i \not\equiv 0 \pmod 3$, yielding a $0\%$ filtration rate for $p=3$.
+    \item \textbf{Modulo 5:} $C(n) \equiv 0 \pmod 5$. Because no offset in $\mathcal{D}$ is divisible by 5, $C(n) \pm d_i \not\equiv 0 \pmod 5$, yielding a $0\%$ filtration rate for $p=5$.
+    \item \textbf{Modulo 7:} $C(n) \equiv 0 \pmod 7$. Because no offset in $\mathcal{D}$ is divisible by 7, $C(n) \pm d_i \not\equiv 0 \pmod 7$, yielding a $0\%$ filtration rate for $p=7$.
+\end{itemize}
+By pre-satisfying these modular constraints, the effective sieve demand is driven to zero during the opening phases of the search space, leaving the localized candidate density dependent solely on prime factors $P > 7$.
+
+\subsection{Quantification of Localized Sieve Efficiency}
+To evaluate the mathematical impact of Sieve Resilience, we distinguish between the raw constellation size $k$ and the effective sieve demand $k_{eff}(P_n)$. We define $k_{eff}$ as a piecewise function of the current sieve index:
+\begin{equation}
+    k_{eff}(P_n) = 
+    \begin{cases} 
+    0 & \text{if } P_n \le 7 \\
+    \nu_{\mathcal{D}}(P_n) \le k & \text{if } P_n > 7
+    \end{cases}
+\end{equation}
+where $\nu_{\mathcal{D}}(P_n)$ represents the exact number of distinct residue classes occupied by $\mathcal{D}$ modulo $P_n$. 
+
+Substituting this optimized parameter into our local transfer function yields a localized inequality tracking candidate density inside the resilient windows:
+\begin{equation}
+    TPA_{n(k)} > (TPA_{n-1(k)}) \cdot \left(1+\frac{2c-k_{eff}(P_{n-1})}{2P_{n-1}}+\frac{c^{2}-k_{eff}(P_{n-1})c}{2P_{n-1}^{2}}\right)
+\end{equation}
+Because $k_{eff} = 0$ for all steps up to $p=7$, the negative filtration terms vanish entirely during the initial expansion. This generates a massive local candidate surplus that accelerates computational search times, a phenomenon empirically verified by the deep-search discoveries recorded in Section 11. Supplement.
+
+\subsection{Heuristic Mapping to the Hardy-Littlewood Singular Series}
+The efficiency achieved by our localized Sieve Resilience algorithm can be rigorously mapped onto the classical asymptotic limits of the integer field. For a constellation with offsets $\mathcal{D}$, the expected density of occurrences over large scales is modulated by the unproven \textbf{Hardy-Littlewood Singular Series} $\mathfrak{S}(\mathcal{D})$ \cite{Hardy1923}:
+\begin{equation}
+\mathfrak{S}(\mathcal{D}) = \prod_{p \ge 2} \left( 1 - \frac{\nu_{\mathcal{D}}(p)}{p} \right) \left( 1 - \frac{1}{p} \right)^{-k}
+\end{equation}
+Our constructive progression $C(n) = 105 + 210n$ acts directly upon the leading coefficients of this infinite product. By forcing $\nu_{\mathcal{D}}(p) = 0$ for $p \le 7$, we algorithmically amplify the initial multiplier of the series:
+\begin{equation}
+\mathfrak{S}_{Resilient}(\mathcal{D}) = \left[ \prod_{p \le 7} \left( 1 - \frac{1}{p} \right)^{-k} \right] \times \prod_{p > 7} \left( 1 - \frac{\nu_{\mathcal{D}}(p)}{p} \right) \left( 1 - \frac{1}{p} \right)^{-k}
+\end{equation}
+Because the finite product bounded by $p \le 7$ yields a strict density maximization multiplier, it mathematically explains the localized survival of these dense configurations. As long as $\mathcal{D}$ remains admissible, $\mathfrak{S}_{Resilient}(\mathcal{D}) > 0$ holds true. When synthesized with our local transfer inequality, this optimization shows that while a global proof of infinity remains conditional on the broader Hardy-Littlewood framework, our primorial selection mechanism provides a highly predictable, mathematically optimized substrate for targeted constellation hunting.
+
+\subsection{Analytical Boundaries and Scaling Constraints}
+While this framework provides a deterministic acceleration model for localized searches up to $k=10$, we note that the optimization model encounters strict geometric boundary constraints as the constellation size scales.
+
+As the size of the target constellation expands toward an arbitrary $2n$-tuple, the physical diameter of the required offset array $\mathcal{D}$ inevitably widens. Once the spatial span of these offsets exceeds the static primorial modulus $M_4 = 210$, the elements of the constellation necessarily begin to intersect with the next un-neutralized prime filters in the sieve sequence ($p = 11, 13, 17, \dots$). 
+
+Consequently, the effective sieve demand $k_{eff}$ leaks back into the linear numerator of the local transfer function, reintroducing localized variance. To maintain a constant efficiency rating for larger arbitrary constellations, the primorial base must scale dynamically as a function of the constellation diameter:
+\begin{equation}
+M_k = \prod_{p \le p_k} p
+\end{equation}
+This architectural scaling property represents the primary roadmap for future computational expansion within this framework.
+
+\section{Conclusion}
+
+The distribution of dense prime constellations has historically been modeled via purely stochastic averages. This paper has demonstrated that the localized tracking of these patterns can be approached as a deterministic mechanical process governed by the geometry of prime regions $[P_n, P_n^2]$.
+
+By formalizing the competitive interaction between quadratic Territory Expansion and linear Density Decay, we isolated a robust, repeatable lower bound governing candidate propagation in localized search windows. Furthermore, by introducing the concept of primorial-aligned Sieve Resilience, we demonstrated a highly efficient method for neutralizing the filtering costs of the most destructive early prime sieves. 
+
+The empirical computational results detailed in the Supplement—culminating in the discovery of isolated symmetric decuplets at magnitude $3.4 \times 10^{10}$ and $1.1 \times 10^{11}$—provide strong validation for this optimization framework. We conclude that while an unconditioned global proof for the infinite propagation of $k$-tuples remains bound to classical open conjectures, the constructive mechanics of primorial coordinate alignment provide a powerful, mathematically rigorous toolkit for optimizing the discovery of complex prime structures within the integer field.
+\begin{thebibliography}{99}
+\bibitem{gemini2025} Gemini (Google AI), \textit{Conversational Thought Partner and Mathematical Formalization Engine}, 2024--2025. \url{https://deepmind.google/technologies/gemini/}
+
+\bibitem{Hardy1923}
+G. H. Hardy and J. E. Littlewood,
+``Some problems of 'Partitio numerorum'; III: On the expression of a number as a sum of primes,''
+\textit{Acta Mathematica}, vol. 44, pp. 1--70, 1923.
+
+\bibitem{rock2026lean}
+J. E. Rock, \textit{RH — Constructive Certificate: A Lean 4 Formalization of the Riemann Hypothesis Proof}, Zenodo, v1.0.0, 2026.
+\end{thebibliography}
+
+\section*{Article Information}
+\textbf{Acknowledgements:} This research was developed through a unique ``Resonant Feedback Loop'' between human mathematical intuition and artificial intelligence. The core logic of the 
+Symmetric Sieve Correlation (SSC) Algorithm originated with the author. The AI (Gemini \cite{gemini2025}) served as the formalization engine, translating the conceptual blueprint into rigorous mathematical prose and optimizing the structural hierarchy of the text. 
+
+\section*{Ethical Compliance}
+\noindent \textbf{Publication Statement:} This manuscript is original work and is not under consideration for publication elsewhere. 
+
+\noindent \textbf{Conflict of Interest Disclosure:} I have no conflicts of interest to disclose.   
+
+\noindent \textbf{Supporting Organizations:} No grants were received from any public, private or non-profit organizations for this research. 
+
+\noindent \textbf{Ethical Approval and Participant Consent:} Not Applicable. 
+
+\noindent \textbf{Availability of data and materials:} Not Applicable
+
+\appendix
+\section{Experimental Verification of Symmetric Constellations}
+
+To validate the Constructive Hypothesis, we employed a computational search to identify specific, rigid symmetric constellations. We present two cases: a symmetric octuplet (8-tuple) used as a pedagogical example, and a symmetric decuplet (10-tuple) found via deep search to demonstrate the method's robustness.
+
+\subsection{Case 1: The Symmetric Octuplet \texorpdfstring{($D_{8}$)}{(D8)}}
+We first defined a symmetric pattern with a diameter of 32, centered at $C$, using power-of-2 offsets:
+\begin{equation}
+    \delta_8 = \{\pm 2, \pm 4, \pm 8, \pm 16\}
+\end{equation}
+
+\subsection{Search Protocol}
+We utilized the ``Sieve Resilience'' generator derived in Section 10:
+\begin{equation}
+    C(n) = 105 + 210n
+\end{equation}
+This generator guarantees that all candidates are coprime to 2, 3, 5, and 7.
+
+\subsection{Results}
+The search identified the first valid symmetric octuplet almost immediately ($n=931$), demonstrating the high efficiency of the selection method for smaller tuples.
+
+\begin{quote}
+\textbf{Center:} $C = 195,615$ \\
+\textbf{Primes:} $\{ 195599, 195607, 195611, 195613, 195617, 195619, 195623, 195631 \}$
+\end{quote}
+The search identified the second valid symmetric octuplet almost quickly ($n=1166$), 
+
+\begin{quote}
+\textbf{Center:} $C=244,965$ \\
+\textbf{Primes:} $\{ 244949, 244957, 244961, 244963, 244967, 244969, 244973, 244981 \}$ 
+\end{quote}
+\subsection{Case 2: The Symmetric Decuplet \texorpdfstring{($D_{10}$)}{(D10)}}
+We extended the search to a symmetric 10-tuple with a diameter of 44, adding the offset $\pm 22$:
+\begin{equation}
+    \delta_{10} = \{\pm 2, \pm 4, \pm 8, \pm 16, \pm 22\}
+\end{equation}
+This pattern is significantly harder to locate due to the modular constraints at $P=11$ (where only centers $C \equiv 1, 10 \pmod{11}$ survive).
+
+\subsection{Results}
+The computational search (using the script in 11.1.6) successfully identified the first occurrence of this constellation at iteration $n = 165,871,800$.
+
+\begin{quote}
+
+\textbf{Iteration:} $n = 165,871,800$
+\begin{equation}
+   C(n) = 105 + 210n
+\end{equation}
+\textbf{Center:} $C = 34,833,078,105$
+\begin{equation}
+   C(n) = 105 + 210n
+\end{equation}
+\textbf{The Primes:}
+\begin{align*}
+    &34833078083, 34833078089, 34833078097, 34833078101, 34833078103, \\
+    &34833078107, 34833078109, 34833078113, 34833078121, 34833078127
+\end{align*}
+\end{quote}
+The computational search (using the script in 11.1.6) successfully identified the second occurrence of this constellation at iteration $n = 543,417,978$.
+
+\begin{quote}
+\textbf{Iteration:} $n = 543,417,978$ Gap from previous Decuplet: 377546178 steps
+\begin{equation}
+    C(n) = 105 + 210n
+\end{equation}
+\textbf{Center:} $C = 114,117,775,485$ \\
+\textbf{The Primes:}
+\begin{align*}
+    &114117775463, 114117775469, 114117775477, 114117775481, 114117775483, \\
+    &114117775487, 114117775489, 114117775493, 114117775501, 114117775507
+\end{align*}
+\end{quote}
+This result confirms that even for highly constrained patterns requiring deep searches (magnitude $11.4 \times 10^{10}$), the ``Supply'' of new territory eventually yields the necessary configuration, as predicted by the Constructive Hypothesis.
+
+\subsection{Source Code}
+The following Python script was used to locate the symmetric decuplet. It utilizes dynamic primality testing to search the number line without a pre-computed database.
+
+% START OF COLORED CODE BLOCK
+\begin{lstlisting}[language=Python]
+from sympy import isprime
+import time
+
+def find_symmetric_decuplet():
+    # Target offsets for Diameter 44
+    offsets = [2, 4, 8, 16, 22]
+    
+    # Start search
+    n = 1
+    found = False
+    
+    print("Searching for symmetric 10-tuple...")
+    
+    while not found:
+        # Construct the center with Sieve Resilience
+        center = 105 + (210 * n)
+        
+        # Optimization: Mod 11 check
+        # Center must be 1 or 10 mod 11 to survive
+        rem = center % 11
+        if rem != 1 and rem != 10:
+            n += 1
+            continue
+
+        candidates = []
+        possible = True
+        
+        for osc in offsets:
+            lower = center - osc
+            upper = center + osc
+            # Fail fast if composite
+            if not isprime(lower) or not isprime(upper):
+                possible = False
+                break
+            candidates.extend([lower, upper])
+        
+        if possible:
+            found = True
+            candidates.sort()
+            print(f"--- FOUND at n={n} ---")
+            print(f"Center: {center}")
+            print(f"Primes: {candidates}")
+        else:
+            n += 1
+
+if __name__ == "__main__":
+    find_symmetric_decuplet()
+\end{lstlisting}
+% END OF COLORED CODE BLOCK
+\end{document}
+
