@@ -11,7 +11,7 @@ Traditional approaches to the distribution of prime constellations (from twin pr
 * **The Local Transfer Inequality:** A deterministic governing formula that tracks the structural candidate surplus generated because the quadratic expansion of the search space ($P^2$) systematically outpaces the linear demand of sieve filtration ($k \cdot P$).
 * **Hardy-Littlewood Initial Coefficient Amplification:** Algorithmic alignment targeting the leading terms of the Singular Series $\mathfrak{S}(D)$, maximizing local candidate density and accelerating discovery times.
 
----
+[10.5281/zenodo.2104](https://doi.org/10.5281/zenodo.21046381)
 
 ## 🗺️ Core Architecture: The Primorial Window
 
