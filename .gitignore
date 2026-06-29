@@ -1,0 +1,56 @@
+# ==========================================
+# C++ / Compiled Binaries
+# ==========================================
+# Prerequisites
+*.d
+*.o
+*.obj
+
+# Executables
+*.exe
+*.out
+*.app
+# Ignore any compiled sieve execution files you build locally
+/sieve_search
+/tuple_verifier
+
+# ==========================================
+# Lean 4 / Theorem Proving
+# ==========================================
+.lake/
+!.lake/packages/
+build/
+# Ignore Lean language server temporary files
+.lean_cache/
+*.olean
+*.ilean
+
+# ==========================================
+# LaTeX / Document Preparation
+# ==========================================
+# Core auxiliary files
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.synctex.gz
+*.toc
+*.pdf
+
+# Glossary and Hyperref temporary tracking
+*.glo
+*.glg
+*.gls
+*.ist
+*.out
+*.out.bak
+*.bbl
+*.blg
+
+# ==========================================
+# System / IDE Clutter
+# ==========================================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
