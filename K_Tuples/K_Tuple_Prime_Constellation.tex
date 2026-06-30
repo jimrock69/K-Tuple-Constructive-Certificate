@@ -275,7 +275,7 @@ Substituting this optimized parameter into our local transfer function yields a 
 \begin{equation}
     TPA_{n(k)} > (TPA_{n-1(k)}) \cdot \left(1+\frac{2c-k_{eff}(P_{n-1})}{2P_{n-1}}+\frac{c^{2}-k_{eff}(P_{n-1})c}{2P_{n-1}^{2}}\right)
 \end{equation}
-Because $k_{eff} = 0$ for all steps up to $p=7$, the negative filtration terms vanish entirely during the initial expansion. This generates a massive local candidate surplus that accelerates computational search times, a phenomenon empirically verified by the deep-search discoveries recorded in Section 11. Supplement.
+Because $k_{eff} = 0$ for all steps up to $p=7$, the negative filtration terms vanish entirely during the initial expansion. This generates a massive local candidate surplus that accelerates computational search times, a phenomenon empirically verified by the deep-search discoveries recorded in Appendix A.
 
 \subsection{Heuristic Mapping to the Hardy-Littlewood Singular Series}
 The efficiency achieved by our localized Sieve Resilience algorithm can be rigorously mapped onto the classical asymptotic limits of the integer field. For a constellation with offsets $\mathcal{D}$, the expected density of occurrences over large scales is modulated by the unproven \textbf{Hardy-Littlewood Singular Series} $\mathfrak{S}(\mathcal{D})$ \cite{Hardy1923}:
@@ -305,7 +305,13 @@ The distribution of dense prime constellations has historically been modeled via
 
 By formalizing the competitive interaction between quadratic Territory Expansion and linear Density Decay, we isolated a robust, repeatable lower bound governing candidate propagation in localized search windows. Furthermore, by introducing the concept of primorial-aligned Sieve Resilience, we demonstrated a highly efficient method for neutralizing the filtering costs of the most destructive early prime sieves. 
 
-The empirical computational results detailed in the Supplement—culminating in the discovery of isolated symmetric decuplets at magnitude $3.4 \times 10^{10}$ and $1.1 \times 10^{11}$—provide strong validation for this optimization framework. We conclude that while an unconditioned global proof for the infinite propagation of $k$-tuples remains bound to classical open conjectures, the constructive mechanics of primorial coordinate alignment provide a powerful, mathematically rigorous toolkit for optimizing the discovery of complex prime structures within the integer field.
+The empirical computational results detailed in the Appendix A culminating in the discovery of isolated symmetric decuplets at magnitude $3.4 \times 10^{10}$ and $1.1 \times 10^{11}$—provide strong validation for this optimization framework. We conclude that while an unconditioned global proof for the infinite propagation of $k$-tuples remains bound to classical open conjectures, the constructive mechanics of primorial coordinate alignment provide a powerful, mathematically rigorous toolkit for optimizing the discovery of complex prime structures within the integer field.
+
+This manuscript is publicly available via GitHub at 
+\url{https://github.com/jimrock69/K-Tuple-Constructive-Certificate} 
+and is permanently archived at Zenodo: 
+\href{https://doi.org/10.5281/zenodo.21046381}{https://doi.org/10.5281/zenodo.21046381}.
+
 \begin{thebibliography}{99}
 \bibitem{gemini2025} Gemini (Google AI), \textit{Conversational Thought Partner and Mathematical Formalization Engine}, 2024--2025. \url{https://deepmind.google/technologies/gemini/}
 
